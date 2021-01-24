@@ -1,0 +1,339 @@
+\documentclass{article}
+
+%----------------------------------------
+% Packages
+%----------------------------------------
+\usepackage[left=1in, right=1in, top=1in, bottom=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath,amsbsy,amssymb,amsfonts,amsthm}
+\usepackage{nicefrac}
+\usepackage{mathtools}
+\usepackage{color}
+\usepackage{xspace} % Correct macro spacing
+\usepackage[numbers]{natbib} % For citations
+\usepackage{times}
+\usepackage{graphicx,subfigure}
+%\usepackage[small,bf]{caption}
+\usepackage{algorithm,algorithmic} 
+\usepackage{hyperref}
+
+\usepackage{xcolor}
+\usepackage{shadethm}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{This is my name}
+\rhead{this is page \thepage}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{IFT 6085 - Theoretical principles for deep learning}
+\rhead{Lecture 11: February 20, 2019}
+
+
+\newshadetheorem{thm}{Theorem}
+\newshadetheorem{defn}[thm]{Definition}
+\newshadetheorem{assm}[thm]{Assumption}
+\newshadetheorem{prop}[thm]{Property}
+\newshadetheorem{eg}[thm]{Example}
+% Define a Lemma env.
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\usepackage{xcolor,colortbl}
+
+
+\definecolor{shadethmcolor}{HTML}{F0F0F0}
+%\definecolor{shadethmcolor}{HTML}{EDEDED}
+%\definecolor{shadethmcolor}{HTML}{EDF8FF}
+%\definecolor{shaderulecolor}{HTML}{EDF8FF}
+%\definecolor{shaderulecolor}{HTML}{45CFFF}
+\setlength{\shadeboxrule}{.4pt}
+
+
+\setlength\parindent{0pt}
+
+% Packages hyperref and algorithmic misbehave sometimes.  We can fix
+% this with the following command.
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+\newcommand{\amy}[1]{\textbf{\textcolor{blue}{#1}}}
+\newcommand{\liam}[1]{\textbf{\textcolor{red}{#1}}}
+
+%----------------------------------------
+% Standard macros
+%----------------------------------------
+
+
+%----------------------------------------
+% Project-specific macros
+%----------------------------------------
+
+%----------------------------------------
+% Header
+%----------------------------------------
+\title{IFT 6085 - Lecture 11 \\ 
+(Applications of Stability) }
+\date{}
+
+%----------------------------------------
+% Document
+%----------------------------------------
+\begin{document} 
+
+%----------------------------------------
+% Abstract
+%----------------------------------------
+\maketitle
+
+\textbf{Scribes:} 
+
+\textbf{Winter 2018}: Amy Zhang, William Fedus
+\hfill
+\textbf{Instructor:} Ioannis Mitliagkas
+
+\textbf{Winter 2019}: Bhargav Kanuparthi, Jonathan Pilault
+
+
+%----------------------------------------
+% Body
+%----------------------------------------
+
+\newcommand{\infgc}{\inf_{g \in \mathcal{C}}}
+\newcommand{\supgc}{\sup_{g \in \mathcal{C}}}
+
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\reals}{\mathbb{R}}
+
+\section*{Summary}
+\textbf{Sufficient condition: Given enough samples we can achieve a good enough generalization.  However, typically in deep learning, we never have large enough data sets to get non-vacuous or meaningful bounds.}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c  | c|} 
+ \hline
+ \rowcolor{shadethmcolor}
+ \textbf{Last Time} & \textbf{Today} \\ [0.5ex] 
+ \hline
+ PAC Bounds &  Stability \\
+ Occam Bounds & PAC Bayes \\
+ PAC Bayes Bounds & (Practical) Generalization \\
+ Stability Bounds &  \\
+\hline
+\end{tabular}
+\end{table}
+
+How can we go from PAC Bayes to a non-vacuous generalization bound?
+
+\vspace{0.3cm}
+By sacrificing some data as part of a dedicated test set, we can measure test set generalization and achieve a tighter bound than the weak population bounds.  See \textit{Tutorial on Practical Prediction Theory for Classification} \cite{Langford:2005:TPP:1046920.1058111} for a comprehensive examination.
+
+
+\section*{Stability}
+\begin{defn}[Uniformly $\beta$-stable algorithm]
+\[
+h_s = \mathcal{A}(S), h_s\in\mathcal{H}
+\]
+Algorithm $\mathcal{A}$ is stable if $\forall (S, z), \forall i=\{1,...,n\}$
+\[
+\sup_{z'\in\mathcal{Z}}|l(h_s, z') - l(h_{s_{i,z}}, z')| \leq \beta
+\]
+
+\noindent where $S$ is the data set, $z$ is an evaluation sample and $S_{i,z}$ refers to replacing the $i^{th}$ element in $S$ with $z$.  
+\end{defn}
+
+
+
+\begin{thm}
+Consider a $\beta$-uniformly stable algorithm $\mathcal{A}$ with respect to a loss function $\ell : \mathcal{Y} \times \mathcal{Y} \rightarrow [0, M]$ and a hypothesis $h_s$ with $|S|=n$. The following bound holds with a probability of $1-\delta$.
+
+\[
+R[h_s]\leq\hat{R}_s[h_s] + \beta  + (\beta n + \frac{M}{2})\sqrt{\frac{2\ln{2/\delta}}{n}}
+\]
+\end{thm}
+
+The term $(\beta n + \frac{M}{2})\sqrt{\frac{2\ln{2/\delta}}{n}}$ is $O(\beta\sqrt{n})$. Informally, an algorithm is stable if $\beta=O(\frac{1}{n})$. If stability is $O(\frac{1}{\sqrt{n}})$, this term is $O(1)$ and we can no longer show decrease in generalization gap with with increase in $n$.
+
+\section*{Empirical Risk Minimization + Regularization is Stable}
+Notation: 
+$$\hat{R}_S(w) \triangleq \hat{R}_S(h_w)$$ where $h_w$ is a model parameterized by weights $w$.
+\begin{align*}
+    l(h,z)&\equiv l(h(x), y) \\
+    l(h_w, z) &\equiv l(w,z)
+\end{align*}
+
+\begin{thm}[ERM with regularization is $\beta$-stable]
+Under the assumption that $\hat{R}_S(w)$ is convex and $l(\cdot|z)$ is L-Lipschitz $\forall z$, Empirical Risk Minimization and Regularization is $\beta$ uniformly stable where
+
+\[
+\beta = \frac{4L^2}{\lambda n}
+\]
+\end{thm}
+\begin{proof}
+The objective function to be optimized can be written as
+$$f_S(w)=\hat{R}_S(w) + \frac{\lambda}{2}||w||_2^2$$
+Consider weights $u,v$ for two different models.
+$$f_S(v) - f_S(u) = [\hat{R}_S(v) + \frac{\lambda}{2}||v||_2^2] - [\hat{R}_S(u) + \frac{\lambda}{2}||u||_2^2]$$
+We perturb the dataset by replacing the data point at $i$ with $z_i'$. Now we get:
+\begin{align*}
+    f_S(v) - f_S(u) &= \hat{R}_{S_{i,z_i'}}(v) + \frac{\lambda}{2}||v||_2^2 - (\hat{R}_{S_{i,z_i'}}(u) + \frac{\lambda}{2}||u||^2_2) + \frac{l(v, z_i) - l(v, z_i')}{n} - \frac{l(u, z_i) - l(u,z_i')}{n} \\
+    &= f_{S_{i,z_i'}}(v) - f_{S_{i,z_i'}}(u) + \frac{l(v, z_i) - l(v, z_i')}{n} - \frac{l(u, z_i) - l(u,z_i')}{n}
+\end{align*}
+Now we substitute $v=\mathcal{A}(S_{i,z_i'})$ and $u=\mathcal{A}(S)$.
+\begin{align*}
+    f_S(\mathcal{A}(S_{i,z_i'})) - f_S(\mathcal{A}(S)) 
+    =& f_{S_{i,z_i'}}(\mathcal{A}(S_{i,z_i'})) - f_{S_{i,z_i'}}(\mathcal{A}(S)) \\ &+ \frac{l(\mathcal{A}(S_{i,z_i'}), z_i) - l(\mathcal{A}(S_{i,z_i'}), z_i')}{n} - \frac{l(\mathcal{A}(S), z_i) - l(\mathcal{A}(S),z_i')}{n}
+\end{align*}
+
+Because
+\begin{align*}
+f_{S_{i,z_i'}}(\mathcal{A}(S_{i, z_i'})) = \min_w f_{S_{i,z_i'}}(w) \\
+\implies \forall w f_{S_{i,z_i'}}(w) \geq f(S_{i,z_i'})(\mathcal{A}(S_{i, z_i'}))
+\end{align*}
+
+\begin{assm}
+    $l(\cdot|z)$ is L-Lipschitz.
+\end{assm}
+
+\begin{align}
+f_S(\mathcal{A}(S_{i,z_i'})) - f_S(\mathcal{A}(S)) &\leq \frac{l(\mathcal{A}(S^{i,z_i'}), z_i) - l(\mathcal{A}(S), z_i)}{n} - \frac{l(\mathcal{A}(S^{i,z_i'}), z_i') - l(\mathcal{A}(S),z_i')}{n} \nonumber\\
+&\leq 2\frac{L}{n}||\mathcal{A}(S)-\mathcal{A}(S_{i,z_i'})||_2 \label{eq:one}
+\end{align}
+
+\begin{assm}
+    $\hat{R}_S(w)$  is cvx.
+\end{assm}
+Which gives us $f_S(w)$ is $\lambda$-str cvx.
+Now we perform a Taylor expansion:
+\begin{align}
+    f_S(\mathcal{A}(S_{i,z_i'})) - f_S(\mathcal{A}(S)) \geq \frac{\lambda}{2}||\mathcal{A}(S_{i,z_i'}) - \mathcal{A}(S)||_2^2
+\label{eq:two}
+\end{align}
+Since $\mathcal{A}(S)$ is the minimizer of $f_s$ and $\lambda$-str cvx the first term disappears.
+
+From \ref{eq:one} and \ref{eq:two} we get:
+\begin{align}
+    ||\mathcal{A}(S) - \mathcal{A}(S_{i,z_i'})|| \leq \frac{4L}{\lambda n}
+\label{eq:three}
+\end{align}
+If we perturb the data by a single element, we learn $\mathcal{A}$ that can become arbitrarily close for large $n$.
+
+We then use \ref{eq:three} and the $L$-Lipschitz property of $l(\cdot,z)$:
+$$\implies \sup_z[l(\mathcal{A}(S), z) - l(\mathcal{A}(S_{i,z_i'}), z)| \leq \frac{4L^2}{\lambda n}$$
+\end{proof}
+
+
+\section*{Stochastic Gradient Descent (SGD) is Stable}
+
+\subsection*{Stability Theorem}
+Recall the SGD update formula,
+
+\begin{equation}
+    w_{t+1} = w_t - \alpha_t \nabla_w l(w_t, z_{i,t}), i_t   \sim \text{uniform}(1, \cdots, n )
+\end{equation}
+
+where $w_t$ is the weight iterate at time $t$, $\alpha_t$ is an (annealing) learning rate at time $t$ and $l(w_t, z_{i,t})$ is the computed loss for the current weight iterate for a particular example $z_{i,t}$.
+ 
+
+\begin{thm}
+If $f(\cdot, z)$ is $\gamma$-smooth, convex and $L$-Lipschitz, then Stochastic Gradient Descent is $\beta$-uniformly stable where
+
+\[
+\beta \leq \frac{2L^2}{n} \sum_{t=1}^{T} \alpha_t
+\]
+\end{thm}
+
+\textbf{Analysis:} \\
+We are no longer requiring the function to be strongly convex.  Additionally, this result holds for a finite number of steps $T$.  
+
+\subsection*{Stability Proof (Rough Outline)}
+We will consider two runs of the SGD algorithm.  One run will be on the original data set $S$ and the other run will be on the data set $S_{i,z_i'}$.  Recall, this indicates the same data set $S$ only now with the $i^{th}$ element swapped with element $z_i'$.  In order to compare the stability between the two runs, we maintain the same order of element selection (same random seed) for $t=1, \cdots, T$.
+
+\vspace{0.2cm}
+
+\begin{defn} 
+    \[
+    \delta_t = || w_t - w_t'||
+    \]
+\end{defn}
+
+
+where $w_t'$ denotes the iterate for the SGD algorithm on the data set $S_{i,z_i'}$.
+
+We can write the expectation of the difference $\delta_{t+1}$ as the following:
+
+\begin{equation} \label{eqn: sgd_prob_decomp}
+    E[\delta_{t+1}] = P(i_t = i) E[\delta_{t+1} | i_t = i] + P(i_t \neq i) E[\delta_{t+1} | i_t \neq i]
+\end{equation}
+
+We introduce two Lemmas
+\begin{lemma} \label{lem: lem_1}
+    \[
+    E[\delta_{t+1} | i_t \neq i] \leq E[\delta_t]
+    \]
+\end{lemma}
+\begin{proof}
+Convexity and $\gamma$-smoothness implies that the gradients are co-coercive for a  function $f$: 
+\[ 
+\langle\,\nabla f(v)- \nabla f(w), v-w \rangle \geq \frac{1}{\gamma}||\nabla f(v)- \nabla f(w)||^2
+\]
+We conclude that the weight update can be expressed as:
+    \[ 
+    ||w_{t+1}-w'_{t+1}||^2 = ||w_t-w'_t||^2 - 2\alpha_t \langle \nabla f(w_t)- \nabla f(w'_t), w_t-w'_t \rangle +\alpha^2 ||\nabla f(w_t)- \nabla f(w'_t)||^2 \]
+    \[
+    \leq ||w_t-w'_t||^2 - (2 \alpha_t / \gamma - \alpha_t^2) ||\nabla f(w_t)- \nabla f(w'_t)||^2 \leq ||w_t-w'_t||^2
+    \]
+so we get, using definition 7 that:
+    \[
+    ||w_{t+1}-w'_{t+1}|| = \delta_{t+1} \leq ||w_{t}-w'_{t}|| = \delta_{t}
+    \]
+\end{proof}
+\begin{lemma} \label{lem: lem_2} And for the index that has been swapped
+    \[
+    E[\delta_{t+1} | i_t = i] \leq E[\delta_t] + 2 \alpha_t L
+    \]
+where $L$ is the Lipschitz value.
+\end{lemma}
+\begin{proof}
+We know that 
+    \[\delta_{t+1}=||w_{t+1}-w_{t+1}'||=||w_t-\alpha_t \nabla l(w_t, z_{i_t}) - ( w_t'-\alpha_t \nabla l(w_t', z_{i_t}))||
+    \]
+Using the triangle inequality we can write
+    \[\delta_{t+1} \leq ||w_t - w_t'|| + \alpha_t||\nabla l(w_t,z_{i_t}) - \nabla l(w_t',z_{i_t})||
+    \]
+Since $l(\cdot, z)$ is L-lipschitz
+    \[\delta_{t+1} \leq \delta_t + 2\alpha_t L
+    \]
+Taking expectation on either side we get
+    \[E[\delta_{t+1}|i_t=i] \leq E[\delta_t] + 2\alpha_t L
+    \]
+\end{proof}
+
+  Using Lemmas \ref{lem: lem_1}, \ref{lem: lem_2}, we may rewrite Equation \ref{eqn: sgd_prob_decomp} as:
+
+\begin{equation}
+    E[\delta_{t+1}] \leq \left(1 - \frac{1}{n}\right)E[\delta_t] + \frac{1}{n} \left( E[\delta_t] + 2 \alpha_t L \right)
+\end{equation}
+
+which when recursively unrolled yields the following final $\delta_T$
+
+\begin{equation}
+    E[\delta_T] = E[|| w_T - w_T' ||] \leq  \sum_{t=0} ^ {T-1}  \frac{ 2 \alpha_t L }{n}
+\end{equation}
+We find that:
+    \[
+    E[\delta_{t+1}] = P(i_t=i)E[\delta_{t+1}|i_t=i] + P(i_t \neq i)E[\delta_{t+1}|i_t \neq i]] 
+    \]
+    \[
+    \leq \frac{1}{n}(E[\delta_t] + 2\alpha_t L) + E[\delta_t](1+\frac{1}{n}) \leq E[\delta_t] + \frac{2 \alpha_t L}{n}
+    \]
+SGD is therefore \textbf{stable} since $\sum_{t=0} ^ {T-1}  \frac{ 2 \alpha_t L }{n} \equiv \beta$ is $O(\frac{1}{n})$ for $n$ data points.
+
+
+
+%----------------------------------------
+
+%----------------------------------------
+\bibliographystyle{abbrvnat}
+\bibliography{Refs/lec9b}
+%----------------------------------------
+\end{document}
