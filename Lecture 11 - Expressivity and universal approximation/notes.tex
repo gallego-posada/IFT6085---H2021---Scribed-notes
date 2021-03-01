@@ -100,22 +100,13 @@ Please report any bugs to the scribes or instructor.
 
 \section{Summary}
 
-In this lecture we will discuss the expressivity of neural networks and introduce the universal approximation theorem. Informally, the \textit{expressivity} of a model describes the class of functions a model can approximate. We will introduce the single layer perceptron and show that it cannot model an exclusive or (XOR) of two binary variables. We will then introduce the multi-layer perceptron (the famous MLP), and prove that it is capable of approximating any continuous function arbitrarily well. In Section \ref{sec:expressive-dnns} we will conclude with two additional results: first, that a width-bounded neural network with ReLU non-linearities can approximate a continuous function $f: \mathbb{R}^n \to \mathbb{R}$ arbitrarily well, and second that there is a class of function for which networks with 2 layers and an exponential number of weights ($2^k$) must have significant error and that a network with $2k$ layers can fit exactly.
+In this lecture we will discuss the expressivity of neural networks and introduce the universal approximation theorem. Informally, the \textit{expressivity} of a model describes the class of functions a model can approximate. We will introduce the perceptron and show that it cannot model an exclusive or (XOR) of two binary variables. We will then introduce the multi-layer perceptron (the famous MLP), and prove in Section \ref{sec:uat} that it is capable of approximating any continuous function arbitrarily well. In Section \ref{sec:expressive-dnns} we will conclude with two additional results: first, that a width-bounded neural network with ReLU non-linearities can approximate a continuous function $f: \mathbb{R}^n \to \mathbb{R}$ arbitrarily well, and second that there is a class of function for which networks with 2 layers and an exponential number of weights ($2^k$) will have significant error and that a network with $2k$ layers can fit exactly.
 
 
 
 \section{Introduction}
 
-
-
-\subsection{Expressivity vs Capacity}
-The term expressivity is often used interchangeably with the term \textit{capacity}, but there are some subtle differences. Below, we will provide an informal distinction between the two.
-
-Say we would like to learn a function which labels a set of input objects. We could learn some neural network to encode them and apply it to each input object then aggregate the inputs and apply a second neural network which predicts the answer. As we get more data, we may find that our network does not represent a hypothesis class that can capture the training data. In other words, it might not have enough parameters or enough layers or the right connections to achieve 100\% training accuracy. We would say that this model needed more capacity.
-
-In contrast, there are some problems for which you need a more \textit{expressive} model. For example, say that instead of an unordered collection of objects, the inputs were a sequence of numbers. Now, the order of the numbers becomes important -- `1', `2', `3' has a distinct meaning from `3', `2', `1'. However, without modification, the hypothesis class described by our encoder and aggregation networks will fail to capture the difference. Increasing the capacity of our network will not solve this problem. Instead, we must select a different hypothesis class which can express sequential data.
-
-
+% 
 \subsection{Expressivity of the perceptron}
 How expressive is a neural network? Let's start with the simplest neural network, the perceptron. It is a neural network with a single unit, having an activation function $\sigma$. Often, we refer to the perceptron as an artificial ``neuron''. Here, both the input $\textbf{x}$ and the weights $\textbf{w}$ are a vector of dimension $1 \times n$.
 
@@ -269,7 +260,7 @@ Informally, this theorem is saying that for any $g \subset C([0,1]^n)$ and any $
       \end{axis}
     \end{tikzpicture}
     \]
-    \caption{We show the fitting of $f(x)$ to $g(x)$ within a tolerance of $\epsilon$ to illustrate the Cybenko universal approximation theorem.}
+    \caption{We show the fitting of $f(x)$ to $g(x)$ within a tolerance of $\epsilon$ to illustrate Cybenko's theorem.}
     \label{fig:cybenko-approx}
 \end{figure}
 
@@ -355,12 +346,12 @@ With $m \leq 2^{(k-3)/(l-1)}$, for any positive integer $k$, $\exists$ a collect
 $$\min_{f\in\mathscr{N}(\sigma_R, m, l)} \mathcal{R}_z(f) = \frac{1}{6} \quad \quad \text{and} \quad \quad \min_{g\in\mathscr{N}(\sigma_R, 2, 2k)} \mathcal{R}_z(g) = 0$$
 \end{thm}
 
-Notably, if we look at the case of 2 layered networks, this tells us that even with $2^{k-3}$ units in the hidden layer, the wide network is going to missclassify $\frac{1}{6}$ of the points, whereas a deep network with $2k$ hidden layers with 2 units each can achieve 0 classification error. What about a recurrent network?  \\
+Notably, if we look at the case of 2 layered networks, this tells us that even with $2^{k-3}$ units in the hidden layer, the wide network is going to misclassify $\frac{1}{6}$ of the points, whereas a deep network with $2k$ hidden layers with 2 units each can achieve 0 classification error. What about a recurrent network?  \\
 
-Let $\mathscr{R}(\sigma, m, l, k)$ denote k iterations of a recurrent neural network, every $f \in \mathscr{R}(\sigma, m, l, k)$ can be expressed as some fixed network $g \in \mathscr{N}(\sigma, m, l)$ applied k times:
+Let $\mathscr{R}(\sigma, m, l; k)$ denote k iterations of a recurrent neural network, every $f \in \mathscr{N}(\sigma, m, l, k)$ can be expressed as some fixed network $g \in \mathscr{N}(\sigma, m, l)$ applied k times:
 $$f(x) = g^k(x) = \underbrace{(g\circ g \cdots \circ g)}_\text{k times}(x)$$
 
-Consequently, $\mathscr{R}(\sigma, m, l, k) \subseteq \mathscr{N}(\sigma, mk, l)$ but the former has $\mathcal{O}(ml)$ parameters whereas the latter has $\mathcal{O}(mlk)$ parameters. Lastly we define the following functions:
+Consequently, $\mathscr{R}(\sigma, m, l; k) \subseteq \mathscr{N}(\sigma, m, lk)$ but the former has $\mathcal{O}(ml)$ parameters whereas the latter has $\mathcal{O}(mlk)$ parameters. We can view the latter ($\mathscr{N}(\sigma, m, lk)$) as an unrolled RNN. Lastly we define the following functions:
 
 \begin{defn}[Sawtooth]
 A function $f: \reals \xrightarrow{} \reals$ is $t$-sawtooth if it is piece-wise linear with $t$-pieces
