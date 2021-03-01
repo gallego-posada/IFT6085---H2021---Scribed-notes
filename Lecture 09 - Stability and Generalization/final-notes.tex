@@ -482,7 +482,7 @@ f_S(\mathcal{A}(S_{i,z_i'})) - f_S(\mathcal{A}(S)) &\leq \frac{l(\mathcal{A}(S_{
 Next, since we assumed that $\hat{R}_S(w)$ is convex, we know that $f_S(w)$ is $\lambda$-strongly convex. Using the property of $\lambda$-strongly convex functions, we can write:
 
 \begin{align}
-    f_S(\mathcal{A}(S_{i,z_i'})) - f_S(\mathcal{A}(S)) &\geq \nabla f_S(\mathcal{A}(S)) (\mathcal{A}(S) - \mathcal{A}(S_{i,z_i'})) +  \frac{\lambda}{2}||\mathcal{A}(S_{i,z_i'}) - \mathcal{A}(S)||_2^2 \\
+    f_S(\mathcal{A}(S_{i,z_i'})) - f_S(\mathcal{A}(S)) &\geq \nabla f_S(\mathcal{A}(S))^\top (\mathcal{A}(S) - \mathcal{A}(S_{i,z_i'})) +  \frac{\lambda}{2}||\mathcal{A}(S_{i,z_i'}) - \mathcal{A}(S)||_2^2 \\
     &= \frac{\lambda}{2}||\mathcal{A}(S_{i,z_i'}) - \mathcal{A}(S)||_2^2
 \label{eq:two}
 \end{align}
