@@ -45,6 +45,7 @@
 \newshadetheorem{assm}[thm]{Assumption}
 \newshadetheorem{prop}[thm]{Property}
 \newshadetheorem{eg}[thm]{Example}
+\newshadetheorem{lemma}[thm]{Lemma}
 
 \definecolor{shadethmcolor}{HTML}{F0F0F0}
 %\definecolor{shadethmcolor}{HTML}{EDEDED}
@@ -94,10 +95,11 @@ Please report any bugs to the scribes or instructor.
 
 \textbf{Scribes}\hfill
 \textbf{Instructor:}  Ioannis Mitliagkas\\
+\textbf{Winter 2021:} Hattie Zhou\\
 \textbf{Winter 2020:} Zarour Mahdi\\
-\textbf{Winter 2019:} Nishanth V Anand, Parviz Haggi,\\
+\textbf{Winter 2019:} Nishanth V Anand, Parviz Haggi,
 Bhargav Kanuparthi, Jonathan Pilault\\
-\textbf{Winter 2018:} Isabela Albuquerque and Nithin Vasisth,\\ Amy Zhang, William Fedus
+\textbf{Winter 2018:} Isabela Albuquerque, Nithin Vasisth, Amy Zhang, William Fedus
 
 
 %----------------------------------------
@@ -116,18 +118,18 @@ Previously we discussed the idea behind a few bounds in Statistical Learning The
 In a coming lecture we will discuss a concrete example of a PAC-based bound for Neural Networks. There, the discussion will also include the notion of stability-based bounds, which is the subject of this lecture.\\
 
 
-The algorithm-agnostic bounds take into account the complexity of the hypothesis class of functions $\mathcal{H}$, without involving the algorithm or the actual distribution of the data. To put it correctly, for the Hoeffding bound to work, the distribution of the data was included in the analysis through the assumption that the data points were i.i.d.. Apart from that, however, no other information about the distribution was used. \\
+The algorithm-agnostic bounds take into account the complexity of the hypothesis class of functions $\mathcal{H}$, without involving the learning algorithm or the actual distribution of the data. More precisely, in order to use Hoeffding's inequality, we assumed that the data points were i.i.d.. Apart from this assumption, however, no other information about the data distribution was used. \\
 
 
-Although we will not delve into the subject of distribution-agnostic bounds, in this lecture we will introduce the first class of bounds that take into account the algorithm. The analysis is largely dependent on the notion of stability which, simply put, says that a change in data distribution does not change the predictions. 
+Although we will not delve into the subject of distribution-agnostic bounds, in this lecture we will introduce the first class of bounds that takes into account the learning algorithm. The analysis is largely dependent on the notion of stability which, simply put, says that a change in data distribution does not change the predictions. 
 
 
 
 \section{PAC Learning}
-The setting of the Probably Approximately Correct (PAC) learning involves the same definitions as before but with a slight change in notation that will help us in our analysis: We introduce $z_i=(x_i,y_i)$ i.e we give each pair a name. 
+The setting of the Probably Approximately Correct (PAC) learning involves the same definitions as before, but we introduce a slight change in notation that will help us in our analysis. We now denote each data pair as $z_i=(x_i,y_i)$.
 
 \begin{defn}[Training set]
-The training set consists of a set of values $z_i=(x_i,y_i)$, where $x_i$ represents a feature vector and $y_i$ the label of the $i$-th sample. Furthermore, $z_i$ are assumed to be i.i.d. and sampled from an unknown data distribution $\mathcal{D}$. 
+The training set consists of a set of values $z_i=(x_i,y_i)$, where $x_i$ represents a feature vector and $y_i$ the label of the $i$-th sample. Furthermore, $z_i$ are assumed to be i.i.d. and sampled from an unknown data distribution $\mathcal{D}$. We denote the sampled dataset as $S$. 
 \[
 	S = \{z_1, z_2, \dots, z_n\}
 \]
@@ -143,7 +145,7 @@ Equivalently, defining $\mathcal{Z}\overset{\Delta}{=}\mathcal{X}\times \mathcal
 \]
 \end{defn}
 Notice that, unlike its previous definition, the loss function is now assumed to be bounded by some constant $M$ instead of 1. 
-Note also that $\mathcal{Z}$ is the space of all tuples $(x_i,y_i) $ and that the previous loss function $\ell(h(x),y)$ is now denoted as $\ell(h,z)$
+Note also that $\mathcal{Z}$ is the space of all tuples $(x_i,y_i) $ and that the previous loss function $\ell(h(x),y)$ is now denoted as $\ell(h,z)$.
 
 
 \section{Stability}
@@ -154,14 +156,14 @@ We start this section by introducing two new notions, the first of which is the 
 \]
 \end{defn}
 According to this definition, a perturbed dataset $S^{i,z}$ is defined by a set whose $i$-th element is replaced by an arbitrary sample $z$. 
-We will see that some learning algorithms give essentially a hypothesis that makes the same predictions no matter if the algorithm is trained on the original dataset or the perturbed one.
+We will see that some learning algorithms produce a hypothesis that makes approximately the same predictions whether the algorithm is trained on the original dataset or the perturbed dataset.
 \begin{defn}[Algorithm]
 A learning algorithm $\mathcal{A}$ is defined as the following mapping
 \[
 \mathcal{A}: (\mathcal{X} \times \mathcal{Y})^n \rightarrow \mathcal{H}.
 \]
 \end{defn}
-It is clear from this definition that an algorithm $\mathcal{A}$ used on a dataset $S$, produces a hypothesis class $h_{S}$ i.e. $h_S = \mathcal{A}(S)$.
+It is clear from this definition that an algorithm $\mathcal{A}$ applied on a dataset $S$, produces a hypothesis $h_{S}$, i.e. $h_S = \mathcal{A}(S)$.
 
 
 \begin{defn}[Uniform stability] An algorithm $\mathcal{A}$ is $\beta$-uniformly stable with respect to the loss function $\ell$ if
@@ -169,7 +171,7 @@ It is clear from this definition that an algorithm $\mathcal{A}$ used on a datas
 	\sup_{z' \in \mathcal{Z}} | \ell(h_S,z') - \ell(h_{S^{i, z}},z' ) | \le \beta.
 \]
 \end{defn}
-This definition measures stability based on how much the predictions or the losses on the predictions change when we train using the perturbed dataset. Notice the two hypotheses: $h_S$ that we get when using the unperturbed dataset and $h_{S^{i,z}}$ that we derive from the perturbed dataset. This definition holds for any dataset but there is no assumption on what particular distribution $S$ comes from. The notion of a $\beta$-uniformly stable algorithm is reminiscent of the familiar notion of Lipschitz property on the loss function. Intuitively, an algorithm with this property can be understood as one that produces a hypothesis such that the loss function $\ell$ is not drastically affected by perturbing the dataset in this manner.\\ 
+This definition measures stability based on how much the predictions or the losses on the predictions change when we train using the perturbed dataset. Notice the two hypotheses: $h_S$ comes from using the unperturbed dataset, and $h_{S^{i,z}}$ comes from using the perturbed dataset. This definition holds for any dataset and there is no assumption on which particular distribution $S$ comes from. The notion of a $\beta$-uniformly stable algorithm is reminiscent of the familiar notion of Lipschitz property on the loss function. Intuitively, an algorithm with this property can be understood as one that produces a hypothesis such that the loss function $\ell$ is not drastically affected by perturbing the dataset in this manner.\\ 
  
  %It is important to emphasize that this is a uniform bound because it is valid for all datasets $S$ and indexes $i$. \\ %We usually do not need such a strong statement, we can restrict the values of $S$ and $z$ to be within the region of the data.
 
@@ -187,13 +189,13 @@ This definition measures stability based on how much the predictions or the loss
 Defect $D[h_S]$ for a hypothesis $h_S$ derived from an algorithm after seeing the dataset $S$ is defined as  the difference between the population risk and the empirical risk. \\
 
 While it is true that 
-for an arbitrary hypothesis $h \in \mathcal{H}$,\;\;\; 
+for an arbitrary hypothesis $h \in \mathcal{H}$,\;
 	$\mathbb{E}[{D}[h]]=\mathbb{E}[R[h] - \hat{R}_S[h]]=0$,
-this is not the case for $D[h_S]$ i.e. we will generally have   
+this is not the case for $D[h_S]$, i.e. we will generally have   
 \[
 	\mathbb{E}[D[h_S]] \neq 0.
 \]
-This is due to second term $\hat{R}_{S}[h_S]$ which evaluates the empirical risk on the same  dataset that is also used to extract the hypothesis. 
+This is due to second term $\hat{R}_{S}[h_S]$ which evaluates the empirical risk on the same  dataset that is also used to extract the hypothesis. As seen in previous lectures, we lose the i.i.d. assumption in this case.
 
 \begin{align*}
     \mathbb{E}_S[\hat{R}_{S}[h_S]]
@@ -205,7 +207,7 @@ In the second line of the above equation, the expectation value is evaluated bas
 The expectation value of the population risk on the learned hypothesis (third line) is evaluated on a random variable $z$, independent from $S$ and drawn from the distribution that the dataset is assumed to come from. 
 The two entities are generally completely different simply because we need the independence assumption for the population risk.\\ 
 
-A meaningful question to ask here is whether the expectation value of the defect, which we showed is generally non-zero, can be bounded. In what follows, we will show that the answer is yes and that this can be done under certain conditions.  
+A meaningful question to ask here is whether the expectation value of the defect, which we showed is generally non-zero, can be bounded. In what follows, we will show that the answer is yes under certain conditions.  
   	
 
 \begin{thm}[Bounding the expectation value of the defect]\label{defec_bound}
@@ -216,7 +218,7 @@ If $\mathcal{A}$ is a $\beta$-uniformly stable algorithm, then
 \end{thm}
 \begin{proof}
 We prove this for one side of the inequality:  
-	 $-\mathbb{E}_{S}[D[h_S]] \le \beta$
+	 $-\mathbb{E}_{S}[D[h_S]] \le \beta$. The proof for the other side can be done using the same arguments.
 
 \begin{align*}
     -\mathbb{E}_S[D[h_S]]
@@ -232,11 +234,15 @@ We prove this for one side of the inequality:
     \Big[\frac{1}{n}\sum_{i=1}^n\beta\Big]=\beta
 \end{align*}	 
 \end{proof}
-In the second line we inserted the population risk as defined  above: $R[h_S]=\mathbb{E}_z\ell(h_S,z)$ In the third line, we used Fubini's theorem which allows us to change the order of the two expectations $\mathbb{E}_{S}$ and $\mathbb{E}_{z}$ as they are independent and bounded (due to the fact that the loss function is bounded by $M$). In the fourth line we rename a variable and finally we calculate the upper bound by using the definition of $\beta$-stability. \\
+In the second step we inserted the population risk as defined above: $R[h_S]=\mathbb{E}_z\ell(h_S,z)$. In the third step, we used Fubini's theorem which allows us to change the order of the two expectations $\mathbb{E}_{S}$ and $\mathbb{E}_{z}$ as $S$ and $z$ are independent and bounded (due to the fact that the loss function is bounded by $M$). In the fourth step, we renamed a variable (see below), and in the last step we arrived at the upper bound by using the definition of $\beta$-stability. \\
+
 \textbf{Note concerning the $4^{th}$ line of the proof:} \\ 
-- Getting a hypothesis from $(z_1, z_2,..., z_n)$ which is $h_S$ and computing the loss in $z_1$ for example.\\
-- And Getting a hypothesis from $(z, z_2,..., z_n)$ which is $h_{S^{1,z}}$ and computing the loss in $z$ is the same thing. \\
-And we generalize that for $i$ in $\{1, 2,..., n\}$\\
+Notice that getting a hypothesis $h_S$ from dataset $\{z_1, z_2,..., z_n\}$ and evaluating the loss on $z_1$ is equivalent to getting a hypothesis $h_{S^{1,z}}$ from dataset $\{z, z_2,..., z_n\}$ and evaluating the loss on $z$, because each $z_i$ is sampled i.i.d. from $\mathcal{D}$. We can then generalize this argument for $i$ in $\{1, 2,..., n\}$ and rewrite $\ell(h_S,z_{i})$ as $\ell(h_{S^{i,z}},z)$.\\
+
+% - Getting a hypothesis from $(z_1, z_2,..., z_n)$ which is $h_S$ and computing the loss in $z_1$ for example.\\
+% - And Getting a hypothesis from $(z, z_2,..., z_n)$ which is $h_{S^{1,z}}$ and computing the loss in $z$ is the same thing. \\
+% And we generalize that for $i$ in $\{1, 2,..., n\}$\\
+
 In conclusion we have proven the following relationship between the expectation values of the empirical and population risks: 
 \begin{prop}[The relationship between the empirical and the population risk]
 \[
@@ -262,11 +268,11 @@ In conclusion we have proven the following relationship between the expectation 
 
 
 
-Note that this is a bound on the  \textit{expectation} value of the population risk. However, even if the expectation values of $R[h_S]$ and $\hat{R}_S[h_S]$ are close, this bound does not necessarily hold for all possible $h_S$. 
-In what follows, we will demonstrate that for a $\beta$-uniformly stable algorithm, the population risk  $R[h_S]$ can be shown to be bounded above by the empirical risk $\hat{R}_S[h_S]$ plus certain other quantities. To do so we will first introduce McDiramid's inequality, a well known concentration inequality.
+Note that this is a bound on the  \textit{expectation} value of the population risk. This means that even if the expectation values of $R[h_S]$ and $\hat{R}_S[h_S]$ are close, this bound does not necessarily hold for all possible $h_S$. 
+In what follows, we will demonstrate that for a $\beta$-uniformly stable algorithm, the population risk  $R[h_S]$ can be bounded above by the empirical risk $\hat{R}_S[h_S]$ plus certain other quantities. To do so we will first introduce McDiramid's inequality, a well known concentration inequality.
 
 \begin{thm}[McDiarmid's inequality]
-Let $V_1, V_2, V_3, \dots , V_n \in \mathcal{V}$ be independent random variables, and $v_1, v_2,v_3,\dots,v_n$ denote specific values (not independent). If a function $f: \mathcal{V}^n \to \mathbb{R}$ has the property that $\forall i \in \{1, 2, \dots, n\}$, 
+Let $V_1, V_2, V_3, \dots , V_n \in \mathcal{V}$ be independent random variables, and $v_1, v_2,v_3,\dots,v_n$ denote observed instances of the random variables (not random). If a function $f: \mathcal{V}^n \to \mathbb{R}$ has the property that $\forall i \in \{1, 2, \dots, n\}$, 
 \[
 	\sup_{v_1, v_2, \dots, v_n, v_i{'}}{\biggl|f(v_1, v_2, \dots, v_n) - f(v_1, \dots,v_{i-1}, v_i^{'}, v_{i+1}, \dots v_n)\biggr|} \leq c_i
 \]
@@ -279,13 +285,15 @@ then
 \begin{proof}
 See Appendix D.2 of \cite{mohri2012foundations}.
 \end{proof}
-This bound is useful because if we prove that an algorithm is $\beta$ stable then we will have this property on a specific function.
-\begin{thm}[Bound for the defect]\label{def_bound} Let "A" be a $\beta$ uniformly stable learning algorithm with respect to a loss function $\ell: \mathcal{Y} \times \mathcal{Y} \rightarrow [0, M]$. The absolute difference of the defect calculated on a dataset $S$ and on a perturbed version of this dataset $S^{i, z}$ is bounded by
+
+McDiarmid's inequality gives us concentration over functions of random variables. This bound is useful because if we prove that an algorithm is $\beta$-stable, then we can assign $f$ to be the defect and achieve a bound on a specific hypothesis.
+
+\begin{thm}[Bound for the defect]\label{def_bound} Let "A" be a $\beta$-uniformly stable learning algorithm with respect to a loss function $\ell: \mathcal{Y} \times \mathcal{Y} \rightarrow [0, M]$. The absolute difference of the defect calculated on a dataset $S$ and on a perturbed version of this dataset $S^{i, z}$ is bounded by
 \[
 \biggl|D[h_S] - D[h_{S^{i,z}}]\biggr| \leq 2\beta + \frac{M}{n}.
 \]
 \end{thm}
-This theorem gives us a bound on the gap between the actual dataset and the perturbed dataset. This is used as a stepping stone in the final theorem. In other words, the theorem tells us that the population risk and the empirical risk are close to each other. This theorem is an example of the use case of McDiramid's inequality.
+This theorem gives us a bound on the gap between the actual dataset and the perturbed dataset. This is used as a stepping stone in the final theorem. As we will see below, the theorem tells us that the population risk and the empirical risk are close to each other for a given hypothesis. This theorem is an example of the use case of McDiramid's inequality.
 \begin{proof}
 Let us expand the following quantity using their definition: 
 \begin{equation}\label{def_risk}
@@ -295,15 +303,15 @@ Using the triangle inequality:
 \begin{equation}
 |D[h_S] - D[h_{S^{i,z}}]| \leq |R[h_S] - R[h_{S^{i,z}}]| + |\hat{R}_{S^{i,z}}[h_{S^{i,z}}] - \hat{R}_S[h_S]| \label{PartAB}
 \end{equation}
-Now, we use the $\beta$ uniform stability of algorithm $\mathcal{A}$ with respect to the loss function $\ell$ to find a bound for $|R[h_S] - R[h_{S^{i,z}}]|$:
+Now, we use the $\beta$-uniform stability of algorithm $\mathcal{A}$ with respect to the loss function $\ell$ to find a bound for $|R[h_S] - R[h_{S^{i,z}}]|$:
 \begin{equation}
 \begin{split}
-\bigl|R[h_S] - R[h_{S^{i,z}}]\bigr| &= \bigl| \mathbb{E}_{z' \sim D} [\ell(h_S, z')] - \mathbb{E}_{z'} [\ell(h_{S^{i,z}}, z')] \bigr| \\ 
+\bigl|R[h_S] - R[h_{S^{i,z}}]\bigr| &= \bigl| \mathbb{E}_{z' \sim D} [\ell(h_S, z')] - \mathbb{E}_{z' \sim D} [\ell(h_{S^{i,z}}, z')] \bigr| \\ 
 &= \bigl|\mathbb{E}_{z' \sim D} [\ell(h_S, z') - \ell(h_{S^{i,z}}, z'))]\bigr| \\
 & \leq \beta \label{partA}
 \end{split}
 \end{equation}
-We can find a bound for $|\hat{R}_{S^{i,z}}[h_{S^{i,z}}] - \hat{R}_S[h_S]|$ by expanding the quantities using their definition (notice that the perturbed dataset is only the non-perturbed one with subtracting $z_i$ and adding $z$ instead)
+We can find a bound for $|\hat{R}_{S^{i,z}}[h_{S^{i,z}}] - \hat{R}_S[h_S]|$ by expanding the quantities using their definition (notice that the perturbed dataset is just the non-perturbed dataset with $z_i$ subtracted and $z$ added).
 \begin{equation}
 \begin{split}
 \bigl|\hat{R}_{S^{i,z}}[h_{S^{i,z}}] - \hat{R}_S[h_S]\bigr| &= \biggr|\frac{1}{n}\sum_{j=1}^{n}\ell(h_{S^{i,z}}, z_j) - \frac{1}{n}\ell(h_{S^{i,z}}, z_i) + \frac{1}{n}\ell(h_{S^{i,z}}, z) - \frac{1}{n}\sum_{j=1}^{n}\ell(h_S, z_j)\biggl|\\
@@ -311,7 +319,7 @@ We can find a bound for $|\hat{R}_{S^{i,z}}[h_{S^{i,z}}] - \hat{R}_S[h_S]|$ by e
 &\leq \frac{M}{n} + \beta \label{partB}
 \end{split}
 \end{equation}
-We could do this last step because we know that $\biggl|\ell(h_{S^{i,z}}, z) - \ell(h_{S^{i,z}}, z_i)\biggr|$ is bounded by $M$ from \textbf{Definition 2}  \\
+We could do this last step because we know that $\biggl|\ell(h_{S^{i,z}}, z) - \ell(h_{S^{i,z}}, z_i)\biggr|$ is bounded by $M$ from \textbf{Definition 2}.  \\
 We now plug in the results obtained from Eq \ref{partA} and Eq \ref{partB} in Eq \ref{PartAB} to get the proof.
 \begin{equation}\label{proof1}
 \begin{split}
@@ -360,21 +368,22 @@ Thus, with probability $1-\delta$
 \begin{split}
 |D[h_S] - \mathbb{E}[D[h_S]]| &\leq \epsilon \\
 D[h_S] &\leq \mathbb{E}[D[h_S]] + \epsilon \\
-D[h_S] &\leq \beta + \epsilon
+D[h_S] &\leq \beta + \epsilon.
 \end{split}
 \end{equation*}
 Replacing $\epsilon$ by the result previously obtained in Eq. \ref{epsilon}
 \begin{equation}
-D[h_S] \leq \beta + \left(n\beta + \frac{M}{2} \right) \sqrt{\frac{2\log\frac{2}{\delta}}{n}}
+D[h_S] \leq \beta + \left(n\beta + \frac{M}{2} \right) \sqrt{\frac{2\log\frac{2}{\delta}}{n}}.
 \end{equation}
-we finally get the desired result,
+We finally get the desired result,
 \begin{equation}
-R[h_S] \leq \hat{R}_S[h_S] + \beta + \left(n\beta + \frac{M}{2} \right) \sqrt{\frac{2\log\frac{2}{\delta}}{n}}
+R[h_S] \leq \hat{R}_S[h_S] + \beta + \left(n\beta + \frac{M}{2} \right) \sqrt{\frac{2\log\frac{2}{\delta}}{n}}.
 \end{equation}
 \end{proof}
-Some notes :\\
-- Notice that as $n$ goes up, our bound becomes less tight (even vacuous) which is not what we want. So we are not satisfied with our current results.\\
-- The term $(\beta n + \frac{M}{2})\sqrt{\frac{2\ln{2/\delta}}{n}}$ is $O(\beta\sqrt{n})$. Informally, an algorithm is stable if $\beta=O(\frac{1}{n})$. If stability is $O(\frac{1}{\sqrt{n}})$, this term is $O(1)$ and we can no longer show decrease in generalization gap with with increase in $n$.
+
+\textbf{Notes:}\\
+% - Notice that as $n$ goes up, our bound becomes less tight (even vacuous) which is not what we want. So we are not satisfied with our current results.\\
+The term $(\beta n + \frac{M}{2})\sqrt{\frac{2\ln{2/\delta}}{n}}$ is $O(\beta\sqrt{n})$. Informally, we say an algorithm is stable if $\beta=O(\frac{1}{n})$. If $\beta$ is $O(\frac{1}{\sqrt{n}})$ for example, this term becomes $O(1)$ and we can no longer show decrease in generalization gap with increase in $n$.\\
 
 
 The following illustration represents a summary of the bounds stated in Theorem \ref{defec_bound} and \ref{risk_bound} (in terms of the defect):
@@ -421,15 +430,19 @@ How can we go from PAC Bayes to a non-vacuous generalization bound?
 By sacrificing some data as part of a dedicated test set, we can measure test set generalization and achieve a tighter bound than the weak population bounds.  See \textit{Tutorial on Practical Prediction Theory for Classification} \cite{Langford:2005:TPP:1046920.1058111} for a comprehensive examination.
 
 \section*{Empirical Risk Minimization + Regularization is Stable}
-Notation: 
-$$\hat{R}_S(w) \triangleq \hat{R}_S(h_w)$$ where $h_w$ is a model parameterized by weights $w$.
+
+In this section, we will show that ERM with regularization is stable. We will see how the regularization term gives us a strongly convex objective, which then allows us to relate differences in objective value to differences in the weights of the hypotheses. We start by introducing some new notation that helps us refer to hypotheses by their weights: 
+
+$$\hat{R}_S(w) \triangleq \hat{R}_S(h_w)$$ where $h_w$ is a model parameterized by weights $w$. \\
+
+Correspondingly, we update the notation inside the loss function as follows:
 \begin{align*}
     l(h,z)&\equiv l(h(x), y) \\
     l(h_w, z) &\equiv l(w,z)
 \end{align*}
 
 \begin{thm}[ERM with regularization is $\beta$-stable]
-Under the assumption that $\hat{R}_S(w)$ is $\lambda$-convex and $l(\cdot|z)$ is L-Lipschitz $\forall z$, Empirical Risk Minimization and Regularization is $\beta$ uniformly stable where
+Under the assumption that $\hat{R}_S(w)$ is convex and $l(\cdot|z)$ as a function of $w$ is L-Lipschitz $\forall z$, Empirical Risk Minimization and Regularization is $\beta$-uniformly stable where
 
 \[
 \beta = \frac{4L^2}{\lambda n}
@@ -437,55 +450,57 @@ Under the assumption that $\hat{R}_S(w)$ is $\lambda$-convex and $l(\cdot|z)$ is
 \end{thm}
 \begin{proof}
 The objective function to be optimized can be written as
-$$f_S(w)=\hat{R}_S(w) + \frac{\lambda}{2}||w||_2^2$$
-Consider weights $u,v$ for two different models.
-$$f_S(v) - f_S(u) = [\hat{R}_S(v) + \frac{\lambda}{2}||v||_2^2] - [\hat{R}_S(u) + \frac{\lambda}{2}||u||_2^2]$$
-We perturb the dataset by replacing the data point at $i$ with $z_i'$. Now we get:
+$$f_S(w)=\hat{R}_S(w) + \frac{\lambda}{2}||w||_2^2.$$
+
+Consider weights $u,v$ for two different models. We have by definition
+$$f_S(v) - f_S(u) = [\hat{R}_S(v) + \frac{\lambda}{2}||v||_2^2] - [\hat{R}_S(u) + \frac{\lambda}{2}||u||_2^2].$$
+
+We perturb the dataset by replacing the data point at $i$ with $z_i'$ sampled i.i.d. from $\mathcal{D}$. Now we get:
 \begin{align*}
     f_S(v) - f_S(u) &= \hat{R}_{S_{i,z_i'}}(v) + \frac{\lambda}{2}||v||_2^2 - (\hat{R}_{S_{i,z_i'}}(u) + \frac{\lambda}{2}||u||^2_2) + \frac{l(v, z_i) - l(v, z_i')}{n} - \frac{l(u, z_i) - l(u,z_i')}{n} \\
-    &= f_{S_{i,z_i'}}(v) - f_{S_{i,z_i'}}(u) + \frac{l(v, z_i) - l(v, z_i')}{n} - \frac{l(u, z_i) - l(u,z_i')}{n}
+    &= f_{S_{i,z_i'}}(v) - f_{S_{i,z_i'}}(u) + \frac{l(v, z_i) - l(v, z_i')}{n} - \frac{l(u, z_i) - l(u,z_i')}{n}.
 \end{align*}
-Now we substitute $v=\mathcal{A}(S_{i,z_i'})$ and $u=\mathcal{A}(S)$.
+Now we can substitute $v=\mathcal{A}(S_{i,z_i'})$ and $u=\mathcal{A}(S)$, where $\mathcal{A}$ is the ERM with regularization learning algorithm.
 \begin{align*}
     f_S(\mathcal{A}(S_{i,z_i'})) - f_S(\mathcal{A}(S)) 
-    =& f_{S_{i,z_i'}}(\mathcal{A}(S_{i,z_i'})) - f_{S_{i,z_i'}}(\mathcal{A}(S)) \\ &+ \frac{l(\mathcal{A}(S_{i,z_i'}), z_i) - l(\mathcal{A}(S_{i,z_i'}), z_i')}{n} - \frac{l(\mathcal{A}(S), z_i) - l(\mathcal{A}(S),z_i')}{n}
+    =& f_{S_{i,z_i'}}(\mathcal{A}(S_{i,z_i'})) - f_{S_{i,z_i'}}(\mathcal{A}(S)) \\ &+ \frac{l(\mathcal{A}(S_{i,z_i'}), z_i) - l(\mathcal{A}(S_{i,z_i'}), z_i')}{n} - \frac{l(\mathcal{A}(S), z_i) - l(\mathcal{A}(S),z_i')}{n}.
 \end{align*}
 
-Because
+Since $\mathcal{A}$ is the ERM + regularization algorithm, $\mathcal{A}(S_{i, z_i'})$ minimizes $f_{S_{i, z_i'}}(\mathcal{A}(S_{i, z_i'}))$. Thus, we have 
 \begin{align*}
 f_{S_{i,z_i'}}(\mathcal{A}(S_{i, z_i'})) = \min_w f_{S_{i,z_i'}}(w) \\
-\implies \forall w f_{S_{i,z_i'}}(w) \geq f(S_{i,z_i'})(\mathcal{A}(S_{i, z_i'}))
+\implies \forall w f_{S_{i,z_i'}}(w) \geq f_{S_{i,z_i'}}(\mathcal{A}(S_{i, z_i'}))\\
+\implies f_{S_{i,z_i'}}(\mathcal{A}(S_{i,z_i'})) - f_{S_{i,z_i'}}(\mathcal{A}(S)) \leq 0
 \end{align*}
 
-\begin{assm}
-    $l(\cdot|z)$ is L-Lipschitz.
-\end{assm}
-
+Using this inequality and our assumption that $l(\cdot|z)$ is L-Lipschitz, we have
 \begin{align}
-f_S(\mathcal{A}(S_{i,z_i'})) - f_S(\mathcal{A}(S)) &\leq \frac{l(\mathcal{A}(S^{i,z_i'}), z_i) - l(\mathcal{A}(S), z_i)}{n} - \frac{l(\mathcal{A}(S^{i,z_i'}), z_i') - l(\mathcal{A}(S),z_i')}{n} \nonumber\\
+f_S(\mathcal{A}(S_{i,z_i'})) - f_S(\mathcal{A}(S)) &\leq \frac{l(\mathcal{A}(S_{i,z_i'}), z_i) - l(\mathcal{A}(S), z_i)}{n} - \frac{l(\mathcal{A}(S_{i,z_i'}), z_i') - l(\mathcal{A}(S),z_i')}{n} \nonumber\\
 &\leq 2\frac{L}{n}||\mathcal{A}(S)-\mathcal{A}(S_{i,z_i'})||_2 \label{eq:one}
 \end{align}
 
-\begin{assm}
-    $\hat{R}_S(w)$  is cvx.
-\end{assm}
-Which gives us $f_S(w)$ is $\lambda$-str cvx.
-Now we perform a Taylor expansion:
+Next, since we assumed that $\hat{R}_S(w)$ is convex, we know that $f_S(w)$ is $\lambda$-strongly convex. Using the property of $\lambda$-strongly convex functions, we can write:
+
 \begin{align}
-    f_S(\mathcal{A}(S_{i,z_i'})) - f_S(\mathcal{A}(S)) \geq \frac{\lambda}{2}||\mathcal{A}(S_{i,z_i'}) - \mathcal{A}(S)||_2^2
+    f_S(\mathcal{A}(S_{i,z_i'})) - f_S(\mathcal{A}(S)) &\geq \nabla f_S(\mathcal{A}(S)) (\mathcal{A}(S) - \mathcal{A}(S_{i,z_i'})) +  \frac{\lambda}{2}||\mathcal{A}(S_{i,z_i'}) - \mathcal{A}(S)||_2^2 \\
+    &= \frac{\lambda}{2}||\mathcal{A}(S_{i,z_i'}) - \mathcal{A}(S)||_2^2
 \label{eq:two}
 \end{align}
-Since $\mathcal{A}(S)$ is the minimizer of $f_s$ and $\lambda$-str cvx the first term disappears.
+
+
+Since $\mathcal{A}(S)$ is the minimizer of $f_S$, the gradient evaluated at $\mathcal{A}(S)$ is $0$ and the first-order term disappears. \\
 
 From \ref{eq:one} and \ref{eq:two} we get:
 \begin{align}
     ||\mathcal{A}(S) - \mathcal{A}(S_{i,z_i'})|| \leq \frac{4L}{\lambda n}
 \label{eq:three}
 \end{align}
-If we perturb the data by a single element, we learn $\mathcal{A}$ that can become arbitrarily close for large $n$.
 
-We then use \ref{eq:three} and the $L$-Lipschitz property of $l(\cdot,z)$:
-$$\implies \sup_z[l(\mathcal{A}(S), z) - l(\mathcal{A}(S_{i,z_i'}), z)| \leq \frac{4L^2}{\lambda n}$$
+This means that the resulting hypotheses from the original dataset and a perturbed dataset have weights that become arbitrarily close for large $n$.\\
+% If we perturb the data by a single element, we learn $\mathcal{A}$ that can become arbitrarily close for large $n$.
+
+Finally, we use \ref{eq:three} and the $L$-Lipschitz property of $l(\cdot,z)$ to go from a bound on the parameters to a bound on the loss values, which completes the $\beta$-uniform stability proof:
+$$\sup_z|l(\mathcal{A}(S), z) - l(\mathcal{A}(S_{i,z_i'}), z)| \leq \frac{4L^2}{\lambda n} = \beta$$
 \end{proof}
 
 
@@ -509,52 +524,55 @@ If $f(\cdot, z)$ is $\gamma$-smooth, convex and $L$-Lipschitz, then Stochastic G
 \]
 \end{thm}
 
-\textbf{Analysis:} \\
-We are no longer requiring the function to be strongly convex.  Additionally, this result holds for a finite number of steps $T$.  
+\textbf{Note:} \\
+Here, we are no longer requiring the function to be strongly convex.  Additionally, this result holds for a finite number of steps $T$.  
 
 \subsection*{Stability Proof (Rough Outline)}
-We will consider two runs of the SGD algorithm.  One run will be on the original data set $S$ and the other run will be on the data set $S_{i,z_i'}$.  Recall, this indicates the same data set $S$ only now with the $i^{th}$ element swapped with element $z_i'$.  In order to compare the stability between the two runs, we maintain the same order of element selection (same random seed) for $t=1, \cdots, T$.
+We will consider two runs of the SGD algorithm.  One run will be on the original dataset $S$ and the other run will be on the dataset $S_{i,z_i'}$.  Recall that $S_{i,z_i'}$ denotes the same dataset as $S$ but with the $i^{th}$ element swapped with element $z_i'$.  In order to compare the stability between the two runs, we maintain the same order of element selection (same random seed) for $t=1, \cdots, T$. 
 
 \vspace{0.2cm}
 
-\begin{defn} 
+\begin{defn} \label{def:delta}
+Let $w_t$ denote the iterate of the SGD algorithm on the dataset $S$ at time step $t$, and let $w_t'$ denote the iterate on the dataset $S_{i,z_i'}$ at time step $t$.
     \[
     \delta_t = || w_t - w_t'||
     \]
 \end{defn}
 
-
-where $w_t'$ denotes the iterate for the SGD algorithm on the data set $S_{i,z_i'}$.
-
-We can write the expectation of the difference $\delta_{t+1}$ as the following:
+We can write the expectation of the difference $\delta_{t+1}$ as follows using the Law of Total Expectation:
 
 \begin{equation} \label{eqn: sgd_prob_decomp}
     E[\delta_{t+1}] = P(i_t = i) E[\delta_{t+1} | i_t = i] + P(i_t \neq i) E[\delta_{t+1} | i_t \neq i]
 \end{equation}
 
-We introduce two Lemmas
+Next, we introduce two Lemmas:
+
 \begin{lemma} \label{lem: lem_1}
+The expectation of the difference does not grow on unperturbed steps.
     \[
     E[\delta_{t+1} | i_t \neq i] \leq E[\delta_t]
     \]
 \end{lemma}
 \begin{proof}
-Convexity and $\gamma$-smoothness implies that the gradients are co-coercive for a  function $f$: 
+First, note that convexity and $\gamma$-smoothness implies that the gradients are co-coercive for a  function $f$: 
 \[ 
 \langle\,\nabla f(v)- \nabla f(w), v-w \rangle \geq \frac{1}{\gamma}||\nabla f(v)- \nabla f(w)||^2
 \]
-We conclude that the weight update can be expressed as:
-    \[ 
-    ||w_{t+1}-w'_{t+1}||^2 = ||w_t-w'_t||^2 - 2\alpha_t \langle \nabla f(w_t)- \nabla f(w'_t), w_t-w'_t \rangle +\alpha^2 ||\nabla f(w_t)- \nabla f(w'_t)||^2 \]
-    \[
-    \leq ||w_t-w'_t||^2 - (2 \alpha_t / \gamma - \alpha_t^2) ||\nabla f(w_t)- \nabla f(w'_t)||^2 \leq ||w_t-w'_t||^2
-    \]
-so we get, using definition 7 that:
+By substituting the SGD update step and expanding the square, the difference in weights can be expressed as:
+\begin{align*}
+    ||w_{t+1}-w'_{t+1}||^2 &= ||w_t-w'_t||^2 - 2\alpha_t \langle \nabla f(w_t)- \nabla f(w'_t), w_t-w'_t \rangle +\alpha^2 ||\nabla f(w_t)- \nabla f(w'_t)||^2\\
+    &\leq ||w_t-w'_t||^2 - (2 \alpha_t / \gamma - \alpha_t^2) ||\nabla f(w_t)- \nabla f(w'_t)||^2\\
+    &\leq ||w_t-w'_t||^2
+\end{align*}
+
+% In the last step, we used the fact ????????? \\
+
+Using definition \ref{def:delta}, we get:
     \[
     ||w_{t+1}-w'_{t+1}|| = \delta_{t+1} \leq ||w_{t}-w'_{t}|| = \delta_{t}
     \]
 \end{proof}
-\begin{lemma} \label{lem: lem_2} And for the index that has been swapped
+\begin{lemma} \label{lem: lem_2} The growth in the distance is bounded after a perturbed step.
     \[
     E[\delta_{t+1} | i_t = i] \leq E[\delta_t] + 2 \alpha_t L
     \]
@@ -562,38 +580,44 @@ where $L$ is the Lipschitz value.
 \end{lemma}
 \begin{proof}
 We know that 
-    \[\delta_{t+1}=||w_{t+1}-w_{t+1}'||=||w_t-\alpha_t \nabla l(w_t, z_{i_t}) - ( w_t'-\alpha_t \nabla l(w_t', z_{i_t}))||
+    \[\delta_{t+1}=||w_{t+1}-w_{t+1}'||=||w_t-\alpha_t \nabla l(w_t, z_{i_t}) - ( w_t'-\alpha_t \nabla l(w_t', z_{i_t}))||.
     \]
 Using the triangle inequality we can write
-    \[\delta_{t+1} \leq ||w_t - w_t'|| + \alpha_t||\nabla l(w_t,z_{i_t}) - \nabla l(w_t',z_{i_t})||
+    \[\delta_{t+1} \leq ||w_t - w_t'|| + \alpha_t||\nabla l(w_t,z_{i_t}) - \nabla l(w_t',z_{i_t})||.
     \]
-Since $l(\cdot, z)$ is L-lipschitz
-    \[\delta_{t+1} \leq \delta_t + 2\alpha_t L
+Since $l(\cdot, z)$ is L-lipschitz,
+    \[\delta_{t+1} \leq \delta_t + 2\alpha_t L.
     \]
-Taking expectation on either side we get
-    \[E[\delta_{t+1}|i_t=i] \leq E[\delta_t] + 2\alpha_t L
+Taking expectation on both sides, we get
+    \[E[\delta_{t+1}|i_t=i] \leq E[\delta_t] + 2\alpha_t L.
     \]
 \end{proof}
 
-  Using Lemmas \ref{lem: lem_1}, \ref{lem: lem_2}, we may rewrite Equation \ref{eqn: sgd_prob_decomp} as:
+Lemmas \ref{lem: lem_1}, \ref{lem: lem_2} tell us that the distance does not grow when we are following the sequence of data points, and every time we hit the perturbed data point, the distance can grow again but this increase is bounded. Hitting a perturbed point will happen every $n$ steps. Using these results, we can rewrite Equation \ref{eqn: sgd_prob_decomp} as:
 
+\begin{align}
+E[\delta_{t+1}] &= P(i_t=i)E[\delta_{t+1}|i_t=i] + P(i_t \neq i)E[\delta_{t+1}|i_t \neq i]] \\
+&\leq \frac{1}{n}(E[\delta_t] + 2\alpha_t L) + \left(1 - \frac{1}{n}\right)E[\delta_t]\\
+& \leq E[\delta_t] + \frac{2 \alpha_t L}{n},
+\end{align}
+\\
+which when recursively unrolled yields the following final $\delta_T$:
 \begin{equation}
-    E[\delta_{t+1}] \leq \left(1 - \frac{1}{n}\right)E[\delta_t] + \frac{1}{n} \left( E[\delta_t] + 2 \alpha_t L \right)
+    E[\delta_T] = E[|| w_T - w_T' ||] \leq  \sum_{t=0} ^ {T-1}  \frac{ 2 \alpha_t L }{n}.
 \end{equation}
 
-which when recursively unrolled yields the following final $\delta_T$
+Finally, the $L$-Lipschitz property of $f(\cdot,z)$ tells us that
+$$E[ |f(w_T, z) - f(w_T', z)|] \leq L E[|| w_T - w_T' ||].$$ We employ the notion of $\beta$-uniform stability for randomized algorithms as 
+$$\sup_z[E[|f(w_T, z) - f(w_T', z)|] \leq \beta.$$
 
-\begin{equation}
-    E[\delta_T] = E[|| w_T - w_T' ||] \leq  \sum_{t=0} ^ {T-1}  \frac{ 2 \alpha_t L }{n}
-\end{equation}
-We find that:
-    \[
-    E[\delta_{t+1}] = P(i_t=i)E[\delta_{t+1}|i_t=i] + P(i_t \neq i)E[\delta_{t+1}|i_t \neq i]] 
-    \]
-    \[
-    \leq \frac{1}{n}(E[\delta_t] + 2\alpha_t L) + E[\delta_t](1+\frac{1}{n}) \leq E[\delta_t] + \frac{2 \alpha_t L}{n}
-    \]
-SGD is therefore \textbf{stable} since $\sum_{t=0} ^ {T-1}  \frac{ 2 \alpha_t L }{n} \equiv \beta$ is $O(\frac{1}{n})$ for $n$ data points.
+Putting everything together, we complete the $\beta$-uniform stability proof as follows:
+\begin{align}
+    \sup_z[E[|f(w_T, z) - f(w_T', z)|] &\leq L E[|| w_T - w_T' ||]\\
+    &= \sum_{t=0} ^ {T-1}  \frac{ 2 \alpha_t L^2 }{n}\\
+    &= \beta
+\end{align}
+
+Since $\beta$ is $O(\frac{1}{n})$, we can conclude that SGD is \textbf{stable}.
 %\subsection*{5.2 Noise and Fast Rates}
 %
 %\begin{prop}[Key Property]
