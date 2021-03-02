@@ -147,7 +147,8 @@ Notably, the perceptron is a linear classifier, and as such it famously cannot a
 \end{figure}
 
 \subsection{The Multi-Layer Perceptron}
-The reading in UML \citep{Shalev-Shwartz:2014:UML:2621980} introduces the Multi-Layer Perceptron (MLP) and discusses its expressivity. Here, we will provide a brief and lossy summary. Figure \ref{fig:nn} shows a very small Multi-Layer Perceptron (MLP) which can correctly classify XOR. As you can see, it is composed of 3 perceptrons, 2 in the hidden layer and 1 in the output layer.
+\label{subsec:mlp}
+The reading in Understanding Machine Learning (UML) \citep{Shalev-Shwartz:2014:UML:2621980} introduces the Multi-Layer Perceptron (MLP) and discusses its expressivity. Here, we will provide a brief and lossy summary. Figure \ref{fig:nn} shows a very small Multi-Layer Perceptron (MLP) which can correctly classify XOR. As you can see, it is composed of 3 perceptrons, 2 in the hidden layer and 1 in the output layer.
 
 \begin{figure}[H]
     \centering
@@ -281,20 +282,20 @@ This implies, among other things, that if we could chose a ``bespoke'' non-linea
 \label{sec:expressive-dnns}
 This section contains several results that relate certain classes of problem, neural network architecture choices, and the number of parameters required to achieve an error on the aforementioned problem. 
 
-\subsection{Expressivity of MLPs}
-In order to further study the expressivity of the feedforward network, we next discuss which Boolean functions (functions from $\{\pm 1\}^n \to \{\pm 1\}$ can be implemented by $\mathcal{H}_{V, E, \text{sign}}$. The non-linearity selected here is the sign function (1 if input is positive, -1 if input is negative), but the result can also be shown for other non-linearities.
+\subsection{\href{https://www.cs.huji.ac.il/~shais/UnderstandingMachineLearning/understanding-machine-learning-theory-algorithms.pdf}{Expressivity of MLPs (Understanding Machine Learning Sec. 20)}}
+Recall from Subsection \ref{subsec:mlp} that the MLP may be defined as a directed acyclic graph $G = (V, E)$ equipped with a non-linearity $\sigma$. In order to study the expressivity of the feedforward network, Understanding Machine Learning (UML) \citep{Shalev-Shwartz:2014:UML:2621980} discusses which Boolean functions (functions from $\{\pm 1\}^n \to \{\pm 1\}$ can be implemented by the hypothesis class of feedforward networks $\mathcal{H}_{V, E, \text{sign}}$. The non-linearity selected here is the sign function (1 if input is positive, -1 if input is negative), but the results that follow in this subsection can also be shown for other non-linearities.
 
 \begin{clm}
 $\forall n$, there exists a graph $(V, E)$ of depth 2, s.t. $\mathcal{H}_{V, E, \text{sign}}$ contains all functions from $\{0, 1\}^n \to \{0, 1\}$.
 \end{clm}
 
-In order to prove this claim, we will construct a network which can compute any Boolean function. However, this network might be exponentially large, and in fact we will see in Theorem \ref{thm:exponential} that it is impossible to express all Boolean functions using a network of polynomial size.
+In order to prove this claim, UML \citep{Shalev-Shwartz:2014:UML:2621980} constructs a network which can compute any Boolean function. However, this network might be exponentially large, and in fact they show in Theorem \ref{thm:exponential} that it is impossible to express all Boolean functions using a network of polynomial size.
 
 \begin{proof}
-We construct a graph with $|V_0| = n + 1$, $|V_1| = 2^n + 1$, and $|V_2| = 1$. Let $E$ be all possible edges between adjacent layers. Now, let $f: \{\pm 1\}^n \to \{\pm 1\}$ be some Boolean function. We need to show that we can adjust the weights so that the network will implement $f$. Let $\textbf{u}_1, \dots, \textbf{u}_k$ be all the vectors in $\{\pm 1\}^n$ on which $f$ outputs 1. Observe that for every $i$ and every $\textbf{x} \in \{ \pm 1\}^n$, if $\textbf{x} \neq \textbf{u}_i$, then $\langle\textbf{x}, \textbf{u}_i \rangle \leq n - 2$ and if $\textbf{x} = \textbf{u}_i$ then $\langle\textbf{x}, \textbf{u}_i \rangle = n$. 
-\vspace{5mm}
-It follows that the function $g_i(\textbf{x}) = \text{sign}(\langle\textbf{x}, \textbf{u}_i \rangle - n + 1)$ equals 1 iff $\textbf{x} = \textbf{u}_i$. We can adapt the weights between $V_0$ and $V_1$ so that for every $i \in [k]$, the neuron $v_{1, i}$ implements the function $g_i(\textbf{x})$. Finally, we observe that $f(\textbf{x})$ is the disjunction of the functions $g_i(\textbf{x})$ and can therefore be written as $$f(\textbf{x)} = \text{sign} \bigg(\sum_{i=1}^k g_i(\textbf{x}) + k - 1 \bigg)$$
-This procedure defines a way to set the weights of a depth-2 network to compute an arbitrary Boolean function, thereby concluding our proof.
+We construct a graph with $|V_0| = n + 1$, $|V_1| = 2^n + 1$, and $|V_2| = 1$. Let $E$ be all possible edges between adjacent layers. Now, let $f: \{\pm 1\}^n \to \{\pm 1\}$ be some Boolean function. We need to show that we can adjust the weights so that the network will implement $f$. Let $\textbf{u}_1, \dots, \textbf{u}_k$ be all the vectors in $\{\pm 1\}^n$ on which $f$ outputs 1. Observe that for every $i$ and every $\textbf{x} \in \{ \pm 1\}^n$, if $\textbf{x} \neq \textbf{u}_i$, then $\langle\textbf{x}, \textbf{u}_i \rangle \leq n - 2$ and if $\textbf{x} = \textbf{u}_i$ then $\langle\textbf{x}, \textbf{u}_i \rangle = n$. \\
+
+It follows that the function $g_i(\textbf{x}) = \text{sign}(\langle\textbf{x}, \textbf{u}_i \rangle - n + 1)$ equals 1 if and only if $\textbf{x} = \textbf{u}_i$. We can adapt the weights between $V_0$ and $V_1$ so that for every $i \in [k]$, the neuron $v_{1, i}$ implements the function $g_i(\textbf{x})$. Finally, we observe that $f(\textbf{x})$ is the disjunction of the functions $g_i(\textbf{x})$ and can therefore be written as $$f(\textbf{x)} = \text{sign} \bigg(\sum_{i=1}^k g_i(\textbf{x}) + k - 1 \bigg)$$
+This defines a weight setting for a depth-2 network to compute an arbitrary Boolean function, concluding our proof.
 \end{proof}
 
 \begin{thm}[Shallow Networks Require Exponential Parameters to Implement Boolean Functions]
